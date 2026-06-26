@@ -7,9 +7,13 @@ Jupyter / edge-tts immersion system was removed — this repo is decks only.
 ## Structure
 
 - One folder per language: `english/`, `french/`, ...
-- `tools/build_deck.py` — the generator. Holds a `CARDS` list and emits, into
-  the `LANGUAGE` folder, one file per deck: `.apkg` (download + double-click).
-  Folders hold only the `.apkg` — no `.tsv`/`.md`.
+- `tools/deck_builder.py` — shared `.apkg` builder (`build(language, slug, deck_id, cards, level)`).
+- `tools/deck_<lang>_<slug>.py` — one script per deck. Holds its `CARDS` list and
+  calls `deck_builder.build(...)` with a **stable `DECK_ID`** (re-import updates,
+  not duplicates). Emits only the `.apkg` into the language folder.
+- **Level is per deck** (`LEVEL`): English Nietzsche = `c2`, French sorcière = `a2`.
+  Pick lexis to match — "advanced/transferable" for C2, "high-frequency everyday"
+  for A1→A2.
 
 ## The deck workflow (per YouTube video)
 
@@ -27,9 +31,11 @@ Jupyter / edge-tts immersion system was removed — this repo is decks only.
 ## Card design (hard rules)
 
 - **Cloze** note type. Front = the real sentence with the term as `{{c1::...}}`.
-- Back is **all in English** (monolingual = transfer): `Intention`, then
-  `Image` (lexis) **or** `Pattern` (verbs/grammar/connectors — a reusable
-  template for her own writing), then `Synonyms`. Optional one-line `note`.
+- Back is written in the strongest **bridge language**: English. For English
+  decks that means monolingual (no Spanish). For other languages (e.g. French),
+  English carries the gloss — add a `meaning` field. Fields, in order:
+  `Meaning` (lower levels), `Intention`, `Image` (lexis) **or** `Pattern`
+  (verbs/grammar/connectors), `Synonyms`, optional `note` (gender, conjugation, register).
 - Never invent sentences — harvest from the transcript.
 - Stable `DECK_ID` / `MODEL_ID` so re-imports update instead of duplicate.
 

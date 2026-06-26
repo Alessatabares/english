@@ -1,22 +1,18 @@
-"""Build an Anki-importable deck from a curated card list.
+"""English deck — Nietzsche, On Truth and Lies in a Nonmoral Sense.
 
-Each card targets the C1 -> C2 jump: advanced lexis, dense verb/grammar
-constructions, and discourse connectors that elevate written English.
-All back content is in English on purpose (monolingual loop = transfer).
+Targets the C1 -> C2 jump: advanced lexis, dense verb/grammar constructions,
+and discourse connectors that elevate written English. Back content is all in
+English on purpose (monolingual = transfer).
 
-Run:  python tools/build_deck.py
-Emits (next to this repo root, under decks/):
-  - <slug>.tsv  -> import into Anki, note type "Cloze", fields Text / Back Extra,
-                   field separator = Tab, "Allow HTML in fields" = ON, tags column 3.
-  - <slug>.md   -> human-readable, grouped by plane (renders on GitHub).
+Run:  python tools/deck_english_nietzsche.py   ->  english/nietzsche-truth-lies.apkg
 """
 
-from pathlib import Path
+import deck_builder
 
-LANGUAGE = "english"   # output folder: one per language (english/, french/, ...)
+LANGUAGE = "english"
 BOOK_SLUG = "nietzsche-truth-lies"
-BOOK_TITLE = "On Truth and Lies in a Nonmoral Sense (Breazeale tr.)"
-SOURCE = "YouTube audiobook, W. A. Haussmann reading / Breazeale translation"
+DECK_ID = 1987452310   # stable: re-import updates instead of duplicating
+LEVEL = "c2"
 
 # Each card:
 #   term      : the target item (also the answer in the cloze)
@@ -263,87 +259,5 @@ CARDS = [
          synonyms="so to speak, in a sense, if you will"),
 ]
 
-PLANE_TITLES = {
-    "vocab": "Plane A — Advanced lexis (C1 → C2)",
-    "verb-construction": "Plane B — Verbs & dense constructions",
-    "grammar": "Plane B′ — Grammar: tense & mood",
-    "connector": "Plane C — Connectors & discourse markers (write like C2)",
-}
-PLANE_ORDER = ["vocab", "verb-construction", "grammar", "connector"]
-
-
-def back_html(c):
-    parts = [f"<b>Intention:</b> {c['intention']}"]
-    if c.get("image"):
-        parts.append(f"<b>Image:</b> {c['image']}")
-    if c.get("pattern"):
-        parts.append(f"<b>Pattern:</b> {c['pattern']}")
-    if c.get("synonyms"):
-        parts.append(f"<b>Synonyms:</b> {c['synonyms']}")
-    if c.get("note"):
-        parts.append(f"<i>{c['note']}</i>")
-    return "<br>".join(parts)
-
-
-def tags_for(c):
-    return f"{BOOK_SLUG} c2 {c['plane']}"
-
-
-def build():
-    root = Path(__file__).resolve().parent.parent
-    out_dir = root / LANGUAGE
-    out_dir.mkdir(exist_ok=True)
-
-    apkg_path = build_apkg(out_dir)
-
-    print(f"Wrote {len(CARDS)} cards")
-    if apkg_path:
-        print(f"  - {apkg_path.relative_to(root)}  (double-click to import)")
-    counts = {p: len([c for c in CARDS if c['plane'] == p]) for p in PLANE_ORDER}
-    print("  planes:", counts)
-
-
-# Stable IDs so re-importing UPDATES the same deck instead of duplicating it.
-DECK_ID = 1987452310
-MODEL_ID = 1987452311
-
-
-def build_apkg(out_dir):
-    """Emit a native Anki .apkg (downloadable, double-click to import)."""
-    try:
-        import genanki
-    except ImportError:
-        print("  (genanki not installed -> skipping .apkg; pip install genanki)")
-        return None
-
-    model = genanki.Model(
-        MODEL_ID,
-        "C2 Cloze (immersion)",
-        fields=[{"name": "Text"}, {"name": "Back Extra"}],
-        templates=[{
-            "name": "Cloze",
-            "qfmt": "{{cloze:Text}}",
-            "afmt": "{{cloze:Text}}<hr id=answer>{{Back Extra}}",
-        }],
-        css=(".card{font-family:Georgia,serif;font-size:20px;color:#222;"
-             "text-align:left;max-width:640px;margin:0 auto;line-height:1.5}"
-             ".cloze{font-weight:bold;color:#1565c0}"
-             "#answer{margin:14px 0}b{color:#000}i{color:#666}"),
-        model_type=genanki.Model.CLOZE,
-    )
-
-    deck = genanki.Deck(DECK_ID, f"english::{BOOK_SLUG}")
-    for c in CARDS:
-        deck.add_note(genanki.Note(
-            model=model,
-            fields=[c["text"], back_html(c)],
-            tags=[BOOK_SLUG, "c2", c["plane"]],
-        ))
-
-    apkg_path = out_dir / f"{BOOK_SLUG}.apkg"
-    genanki.Package(deck).write_to_file(str(apkg_path))
-    return apkg_path
-
-
 if __name__ == "__main__":
-    build()
+    deck_builder.build(LANGUAGE, BOOK_SLUG, DECK_ID, CARDS, LEVEL)
