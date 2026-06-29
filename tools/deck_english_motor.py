@@ -8,22 +8,22 @@ the generative sentence frames.
 
 Deliberate exception to the repo's "never invent" rule: a foundation deck has no
 source video, so the sentences are invented on purpose — short, funny and vivid
-(ADHD memory sticks to the absurd). Active recall via cloze; system thinking via
-Intention (the job) + Pattern (the reusable frame) + note (the contrast). All
-monolingual English.
+(vivid, absurd sentences are more memorable). Active recall via cloze; system
+thinking via Intention (the job) + Pattern (the reusable frame) + note (the
+contrast). All monolingual English.
 
-Study ONE plane at a time (tags) — that's your "línea del día", not the whole
-deck at once.
+Study one plane at a time (tags), not the whole deck at once.
 
-Run:  python tools/deck_english_motor.py   ->  english/core-motor.apkg
+Run:  python tools/deck_english_motor.py   ->  english/motor/motor.apkg
 """
 
 import deck_builder
 
 LANGUAGE = "english"
-BOOK_SLUG = "core-motor"
+BOOK_SLUG = "motor"    # Anki deck name -> english::motor
 DECK_ID = 1987452312   # stable: re-import updates instead of duplicating
 LEVEL = "core"
+SUBFOLDER = "motor"    # the .apkg lives in english/motor/
 
 SOURCE_URL = ""  # curated foundation deck, no source video (legitimately empty)
 DESCRIPTION = (
@@ -397,4 +397,12 @@ CARDS = [
 ]
 
 if __name__ == "__main__":
-    deck_builder.build(LANGUAGE, BOOK_SLUG, DECK_ID, CARDS, LEVEL, DESCRIPTION)
+    import shutil
+
+    path = deck_builder.build(LANGUAGE, BOOK_SLUG, DECK_ID, CARDS, LEVEL, DESCRIPTION)
+    # Relocate the .apkg into the english/motor/ subfolder.
+    sub = path.parent / SUBFOLDER
+    sub.mkdir(exist_ok=True)
+    dest = sub / f"{BOOK_SLUG}.apkg"
+    shutil.move(str(path), str(dest))
+    print(f"Moved -> {dest.relative_to(path.parent.parent)}")
