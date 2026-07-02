@@ -6,19 +6,33 @@ the reading decks (e.g. the sorcière tale).
 
 - **File:** `motor.apkg` → imports as the Anki deck `french::motor`
 - **Source script:** `../../tools/deck_french_motor.py`
-- **Cards:** 41 · French target, English gloss (bridge language) · Cloze
+- **Cards:** 29 · French target, English gloss (bridge language) · Cloze
 - **Stable `DECK_ID`** → re-importing updates the cards, never duplicates.
 
-## Card design
+## Card design — pattern-centric
 
-Cloze note. Front = a short, vivid sentence with the key French piece hidden in
-`{{c1::…}}` (active recall). Back, in English (the bridge):
+Same model as the English motor. The learning unit is the **pattern**, not the word:
 
-- **Meaning** — the English gloss of the French item.
-- **Intention** — the job the item does.
-- **Pattern** — the reusable, generative frame (one card → many sentences).
-- **Image** — a concrete mental picture (concrete words only).
-- **note** — the gender trap or the contrast with a confusable neighbour.
+```
+FORK (the discriminator) → VARIATION (several examples) → COMPRESSION (the rule)
+```
+
+Two card shapes, same Cloze note:
+
+1. **Contrast set** — a fork with a confusable neighbour (`le` vs `la`, `à` vs
+   `de`, `passé composé` vs `imparfait`). Front = a **title** naming the fork +
+   3–6 varied example lines, each with its pivot in `{{c1::…}}`. Every blank is
+   `c1`, so it's **one card** ("fill every blank"), and the answers differ line
+   to line — you have to actually discriminate.
+2. **Simple** — an item with no obvious neighbour (`chez`, `il faut`). Front =
+   1–2 clozed lines; keeps the English `meaning` gloss.
+
+Back, in English (the bridge):
+
+- **Rule** — the discriminator headline (red, on top): the one line to compress.
+- **Meaning** — the English gloss (simple cards).
+- **Intention** — the job the pattern does.
+- **Pattern** / **note** — the reusable frame, or the gender trap / neighbour.
 
 Sentences are **invented on purpose** (a foundation deck has no source video):
 the declared exception to the repo's "harvest from source" rule, which is why
@@ -27,22 +41,23 @@ the declared exception to the repo's "harvest from source" rule, which is why
 ## What it covers — structural map (and how it differs from English)
 
 French has load-bearing structures English lacks; the motor is built around them.
+Most rows are **contrast sets** — the fork is right there in the title.
 
-| Tag (`plane`) | Subsystem | Covers |
+| Tag (`plane`) | Subsystem | Forks & items |
 |---|---|---|
-| `grammar` | Gender & articles | `le/la/les`, `un/une/des`, partitive `du/de la`, contractions `au/du` — every noun is M/F |
-| `grammar` | Subject pronouns | `on` (= informal we), `tu/vous`, gendered `il/elle` for objects |
-| `verb-construction` | Pillar verbs | `être / avoir / aller / faire` conjugated |
-| `grammar` | Present tense | regular `-er` / `-ir` endings |
-| `grammar` | Past | passé composé, the `être`-verbs + agreement, imparfait |
-| `grammar` | Future & conditional | futur proche (`aller` + inf), polite `voudrais` |
-| `grammar` | Negation | two-part `ne … pas / jamais / rien` |
-| `grammar` | Object pronouns | pre-verbal `le/la/les`, `y`, `en` |
-| `grammar` | Questions | `est-ce que`, `qu'est-ce que`, question words |
-| `grammar` | Prepositions | `à` / `de` pillars + contractions, `chez`, `en` |
-| `expression` | Impersonal frames | `c'est`, `il y a`, `il faut` |
-| `connector` | Connectors | `et/mais/ou`, `parce que`, `donc`, `si/quand` |
-| `grammar` | Adjectives | position (mostly after) + gender/number agreement, BAGS exceptions |
+| `grammar` | Gender & articles | `le` vs `la` vs `les`, `un/une/des`, partitive `du/de la/des`, contractions `au/du` |
+| `grammar` | Subject pronouns | `on` vs `nous`, `tu` vs `vous`, gendered `il/elle` for objects |
+| `verb-construction` | Pillar verbs | `être / avoir / aller / faire`, plus être/avoir plural forms |
+| `grammar` | Present tense | regular `-ER` vs `-IR` endings |
+| `grammar` | Past | `passé composé` vs `imparfait`; auxiliary `avoir` vs `être` + agreement |
+| `grammar` | Future & politeness | `je veux` vs `je voudrais`, futur proche (`aller` + inf) |
+| `grammar` | Negation | two-part `ne … pas / jamais / rien / personne` |
+| `grammar` | Pre-verbal pronouns | `le/la/les` vs `y` vs `en` |
+| `grammar` | Questions | 3 ways to ask (`est-ce que` / inversion / intonation), question words |
+| `grammar` | Prepositions | `à` vs `de` (+ contractions), `chez`, `en` |
+| `expression` | Impersonal frames | `c'est` vs `il est`, `il y a`, `il faut` |
+| `connector` | Connectors | `et/mais/ou`, `parce que` vs `donc`, `si` vs `quand` |
+| `grammar` | Adjectives | position (after vs BAGS before) + gender/number agreement |
 | `verb-construction` | Reflexive verbs | `je me lève`, `je m'appelle` |
 
 **Out of scope (by design):** topical vocabulary, advanced lexis, the subjunctive,
@@ -53,7 +68,7 @@ literary tenses — those belong to the reading/elevation decks.
 ```
 # 1. Build the deck (from repo root, venv active)
 source .venv/bin/activate
-python tools/deck_french_motor.py         # -> french/motor/motor.apkg
+python3 tools/deck_french_motor.py        # -> french/motor/motor.apkg
 
 # 2. Import
 #    double-click french/motor/motor.apkg  -> deck "french::motor" in Anki
